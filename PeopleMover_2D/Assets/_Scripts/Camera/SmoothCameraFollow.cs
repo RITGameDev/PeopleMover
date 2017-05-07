@@ -13,6 +13,7 @@ public class SmoothCameraFollow : MonoBehaviour {
     [Tooltip("The object that we want to follow.")]
     public Transform followTarget;
     
+    // How smooth of camera movement we want
     public float smoothing = 1f;
 
     // The offset from the object

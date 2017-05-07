@@ -27,7 +27,11 @@ public class Movement : MonoBehaviour {
     // The rigidbody of this object for movement
     private Rigidbody2D rb_2d;  
 
-	// Use this for initialization
+	/// <summary>
+    /// Set up the Rigidbody accordingly
+    /// 
+    /// Author: Ben Hoffman
+    /// </summary>
 	void Start ()
     {
         // Get the 2d rigidbody componenet
@@ -36,9 +40,20 @@ public class Movement : MonoBehaviour {
         rb_2d.gravityScale = 0f;
 	}
 	
-	// Update is called once per frame
+	/// <summary>
+    /// Check for input from the player and apply a force to the carts
+    /// rigidbody in that direction
+    /// 
+    /// Author: Ben Hoffman
+    /// </summary>
 	void Update ()
     {
+        // If we are not playing the game, then return
+        if(GameManager.Instance.CurrentState != GameStates.Playing)
+        {
+            return;
+        }
+
         // Reset the movement vector
         movementVector.x = 0f;
         movementVector.y = 0f;
@@ -67,6 +82,5 @@ public class Movement : MonoBehaviour {
         transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 
     }
-
 
 }
