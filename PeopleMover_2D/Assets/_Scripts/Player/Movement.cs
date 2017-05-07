@@ -59,15 +59,14 @@ public class Movement : MonoBehaviour {
         {
             // Add a force in the opposite direction, scaled by how much faster we are going
             rb_2d.AddForce(-rb_2d.velocity.normalized * (rb_2d.velocity.magnitude - MAX_SPEED), ForceMode2D.Impulse);
-
-            //float angle = Mathf.Atan2(-rb_2d.velocity.x, rb_2d.velocity.y) * Mathf.Rad2Deg;
-            float angle = Mathf.Atan2(-movementVector.x, movementVector.y) * Mathf.Rad2Deg;
-            // Rotate to look in the direction that we are moving
-            transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
         }
+ 
+        // Calculate the angle that we need to look at based on velocity
+        float angle = Mathf.Atan2(-rb_2d.velocity.x, rb_2d.velocity.y) * Mathf.Rad2Deg;
+        // Rotate to look in the direction that we are moving
+        transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 
-
-	}
+    }
 
 
 }
