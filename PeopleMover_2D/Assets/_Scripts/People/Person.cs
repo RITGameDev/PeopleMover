@@ -10,36 +10,48 @@ using UnityEngine;
 /// </summary>
 public class Person : MonoBehaviour {
 
-    public AngerManagment angerManager;
-
+    public float lifeAfterAnger = 1f;
     public float startTemper;
 
     public Transform destination;   // Where this 'person' wants to go
 
-    public Sprite angryPersonSprite;
-    public Sprite inRangePersonSprite;
+    public Color angryColor;
+    public Color happyColor;
+
+    private SpriteRenderer spRend;
 
     private float currentTemper;    // This person's current temper
 
     private bool pickedUp;
     private bool reportedAngry;
 
-    private Sprite startingSprite;
+    private float _timeSinceAngry;
 
     public bool PickedUp { get { return pickedUp; } }
+    public bool IsAngry { get { return reportedAngry; } }
 
-	// Use this for initialization
+	/// <summary>
+    /// Get the sprite rend componene,t and set the current temper variable
+    /// 
+    /// Author: Ben Hoffman
+    /// </summary>
 	void Start ()
     {
         // Set the current temper of this player
         currentTemper = startTemper;
-        startingSprite = GetComponentInChildren<SpriteRenderer>().sprite;
-        //TODO:  Pick a destination point
+
+        // Get our sprite renderer component
+        spRend = GetComponentInChildren<SpriteRenderer>();
     }
 	
-	// Update is called once per frame
+	/// <summary>
+    /// Keep track of the amount of time it takes us to get angry
+    /// 
+    /// Author: Ben Hoffman
+    /// </summary>
 	void Update ()
     {
+        // As long as we are not picked up already or we have not already reported as angry...
         if (!pickedUp && !reportedAngry)
         {
             // Decrememnet the temper of this person
@@ -51,47 +63,65 @@ public class Person : MonoBehaviour {
                 // Get angry 
                 GetAngry();
             }
+            // Lerp our color based on the percentage of how angry we are
+            spRend.color = Color.Lerp(happyColor, angryColor, currentTemper / startTemper);
+        }
+
+        // Only stay alive for a certain amount of time after we get angry
+        if (reportedAngry)
+        {
+            // Increase the amount of time since we have been angry
+            _timeSinceAngry += Time.deltaTime;
+            // If we exceed that amount of time, then...
+            if(_timeSinceAngry >= lifeAfterAnger)
+            {
+                // Set ourselves as inactve
+                gameObject.SetActive(false);
+            }
         }
 
 	}
 
+    /// <summary>
+    /// Handle this person getting angry
+    /// 
+    /// Author: Ben Hoffman
+    /// </summary>
     public void GetAngry()
     {
+        // Show little exclamation points
+
         // Report to the player that they have angered someone
-        angerManager.AngeredPerson();
+        GameManager.Instance.AngerManager.AngeredPerson();
 
         // Set our sprite to angry
-        GetComponentInChildren<SpriteRenderer>().sprite = angryPersonSprite;
-
+        GetComponentInChildren<SpriteRenderer>().color = angryColor;
+        // Report that we have been angry
         reportedAngry = true;
     }
 
     /// <summary>
     /// Call this method from the cart manager to let the player know that
     /// they are in range of some people
+    /// 
+    /// Author: Ben Hoffman
     /// </summary>
     public void InRangeOfCart()
     {
+        // If we are not reported as angry...
         if (!reportedAngry)
         {
             // Change our sprite
-            GetComponentInChildren<SpriteRenderer>().sprite = inRangePersonSprite;
+            GetComponentInChildren<SpriteRenderer>().color = happyColor;
         }
     }
 
     /// <summary>
-    /// Call this method from the cart class to let the player know that they are out
-    /// of range of the cart now
+    /// Use this to handle things that individual people will do 
+    /// when they get picked up, like set their object as inactive, 
+    /// 
+    /// Author: Ben Hoffman
     /// </summary>
-    public void OutOfRangeCart()
-    {
-        if (!reportedAngry)
-        {
-            // Change our sprite
-            GetComponentInChildren<SpriteRenderer>().sprite = startingSprite;
-        }
-    }
-
     public void GetPickedUp()
     {
         if (!reportedAngry)
@@ -99,7 +129,7 @@ public class Person : MonoBehaviour {
             pickedUp = true;
 
             // Set our sprite to angry
-            GetComponentInChildren<SpriteRenderer>().sprite = angryPersonSprite;
+            GetComponentInChildren<SpriteRenderer>().color = Color.black;
 
         }
     }

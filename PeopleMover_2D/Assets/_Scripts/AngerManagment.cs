@@ -13,16 +13,29 @@ public class AngerManagment : MonoBehaviour {
     [Tooltip("The number of people that the player is allowed to hit before they get fired")]
     public int allowedPeopleAngered = 10;
 
+    [Space]
+    [Header("User Interface")]
     public Text Text_maxPeopleAngered;
     public Text Text_currentAngryPeople;
 
+
     private int currentAngeredPeople = 0;   // The current number of people hit
 
-
+    /// <summary>
+    /// Set up the UI for this object
+    /// 
+    /// Author: Ben Hoffman
+    /// </summary>
     private void Start()
     {
         Text_maxPeopleAngered.text = "/ " + allowedPeopleAngered.ToString();
         Text_currentAngryPeople.text = currentAngeredPeople.ToString();
+    }
+
+    private void OnEnable()
+    {
+        // The the game manager reference
+        GameManager.Instance.AngerManager = this;
     }
 
     /// <summary>

@@ -10,24 +10,33 @@ using UnityEngine;
 [RequireComponent(typeof(AngerManagment))]
 public class CartManager : MonoBehaviour {
 
+    
     public int numberOfSeats;
+    [Tooltip("One of these objects will be placed at every person's destination")]
+    public GameObject showDestination_Prefab;
 
-    public UnityEngine.UI.Text Text_currentPeopleCount;
-    public UnityEngine.UI.Text Text_maxPeopleCount;
+    [Space]
 
-
+    [Header("Collision Masks")]
     [Tooltip("This is the layer that you can pick people up on, without angering them")]
     public LayerMask pickUpRangeMask;
     [Tooltip("This is the layer that people get hurt on")]
     public LayerMask hittingPersonMask;
 
+    [Space]
+  
+    [Header("User Interface")]
+    public UnityEngine.UI.Text Text_currentPeopleCount;
+    public UnityEngine.UI.Text Text_maxPeopleCount;
+
+
     private AngerManagment angerManager;
-
     private Person personInRange;
-
     private int currentPeopleInCart;
 
-    private Person[] peopleInCart;
+    private Queue<Person> peopleInCart;
+
+    private Transform[] destinationObjects; 
 
 
     private void Start()
@@ -36,11 +45,24 @@ public class CartManager : MonoBehaviour {
         angerManager = GetComponent<AngerManagment>();
 
         // Instantiate the number of people that we have seats for
-        peopleInCart = new Person[numberOfSeats];
+        peopleInCart = new Queue<Person>();
 
         // Set up the UI
         Text_maxPeopleCount.text = "/ " + numberOfSeats.ToString();
         Text_currentPeopleCount.text = currentPeopleInCart.ToString();
+
+        // Set up the destination markers
+        destinationObjects = new Transform[numberOfSeats];
+
+        for (int i = 0; i < numberOfSeats; i++)
+        {
+            // Instantiate one of these objects
+            GameObject temp = Instantiate(showDestination_Prefab);
+            // Set it as inactive
+            temp.gameObject.SetActive(false);
+            // Keep track of this objects position for later
+            destinationObjects[i] = temp.transform;
+        }
     }
 
     /// <summary>
@@ -53,7 +75,8 @@ public class CartManager : MonoBehaviour {
         {
             // Pick up this person
             PickUpPerson();
-        }
+        }      
+
     }
 
 
@@ -71,12 +94,24 @@ public class CartManager : MonoBehaviour {
             // Anger that person
             collision.GetComponent<Person>().GetAngry();
         }
-        else if (collision.gameObject.CompareTag("PersonInRange"))
+        else if (collision.gameObject.CompareTag("PersonInRange") && personInRange == null)
         {
             // Keep track of that person 
             personInRange = collision.GetComponentInParent<Person>();
-            // let the cart know that we are in range of the cart now
-            personInRange.InRangeOfCart();
+
+            // If this person is angry then get rid of them
+            if (personInRange.IsAngry)
+            {
+                // Get rid of them
+
+            }
+            else
+            {
+
+                // let the cart know that we are in range of the cart now
+                personInRange.InRangeOfCart();
+            }
+
         }
 
         #region Using Layers (Not working)
@@ -105,16 +140,21 @@ public class CartManager : MonoBehaviour {
         // If we leave a bus stop then we can no longer pick people up[
         if (collision.gameObject.CompareTag("PersonInRange") && personInRange != null)
         {
-            personInRange.OutOfRangeCart();
-
             personInRange = null;
         }
     }
 
     private void PickUpPerson()
     {
-        // Keep track of what people we are carrying
-        peopleInCart[currentPeopleInCart] = personInRange;
+        if(peopleInCart.Count >= numberOfSeats)
+        {
+            //TODO: Tell the player somehow that their cart is full
+
+            return;
+        }
+
+        // Add this person to the queue
+        peopleInCart.Enqueue(personInRange);
 
         // Tell the person to get picked up
         personInRange.GetPickedUp();
@@ -122,21 +162,35 @@ public class CartManager : MonoBehaviour {
         // Parent the transform of the person to our cart
         personInRange.transform.SetParent(transform);
 
+        personInRange.transform.localPosition = Vector3.zero;
+
+        // Set the destination object to the destination of the person
+        destinationObjects[currentPeopleInCart].gameObject.SetActive(true);
+        destinationObjects[currentPeopleInCart].transform.position = personInRange.destination.position;
+
         // Remove the person that we were in range with from our temp placeholder object
         personInRange = null;
+
         // Increase the number of people that are in our cart
         currentPeopleInCart++;
 
         // Update the UI 
         Text_currentPeopleCount.text = currentPeopleInCart.ToString();
-
+        
     }
 
 
     private void DropOffPerson()
     {
-        currentPeopleInCart--;
+        // If we have nobody, then return
+        if (!peopleInCart.Peek())
+        {
+            //TODO: Add some sort of bad sound to make sure that the player knows
+            return;
+        }
 
+        currentPeopleInCart--;
+        
         // Update the UI
         Text_currentPeopleCount.text = currentPeopleInCart.ToString();
 

@@ -88,6 +88,8 @@
     <Compile Include="Assets\_Scripts\Camera\SmoothCameraFollow.cs" />
     <Compile Include="Assets\_Scripts\Game Manager\GameManager.cs" />
     <Compile Include="Assets\_Scripts\Game Manager\GameStates.cs" />
+    <Compile Include="Assets\_Scripts\People\ObjectPool.cs" />
+    <Compile Include="Assets\_Scripts\People\PeopleSpawner.cs" />
     <Compile Include="Assets\_Scripts\People\Person.cs" />
     <Compile Include="Assets\_Scripts\Player\CartManager.cs" />
     <Compile Include="Assets\_Scripts\Player\Movement.cs" />

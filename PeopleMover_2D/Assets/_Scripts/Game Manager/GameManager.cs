@@ -13,6 +13,9 @@ public class GameManager : MonoBehaviour {
     // public static instance of this object for others to reach it
     public static GameManager Instance;
 
+    public PeopleSpawner PeopleSpawner;
+    public AngerManagment AngerManager;
+
     private GameStates _currentState;
 
     public GameStates CurrentState { get { return _currentState; } }
