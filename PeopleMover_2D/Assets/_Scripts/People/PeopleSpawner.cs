@@ -18,8 +18,11 @@ public class PeopleSpawner : MonoBehaviour
     public bool SpawningEnemies = true;
 
     private float timeSinceLastWave;
+
     private ObjectPool personObjectPool;
-    private Vector3[] peopleSpawnPoints;
+
+    public Vector3[] peopleSpawnPoints;
+
     private int lastIndex = -1;
 
 	// Use this for initializationg
@@ -39,10 +42,7 @@ public class PeopleSpawner : MonoBehaviour
 
         // Get our object pool componenet
         personObjectPool = GetComponent<ObjectPool>();
-
-        // Start the spawning coroutine
-        StartCoroutine(SpawnPeopleRandomly());
-	}
+    }
 
     /// <summary>
     /// Randomly spawn people at doors within the given intervals
@@ -50,40 +50,48 @@ public class PeopleSpawner : MonoBehaviour
     /// <returns>Null</returns>
     private IEnumerator SpawnPeopleRandomly()
     {
-        while (SpawningEnemies)
+        yield return new WaitForSeconds(timeBetweenWaves);
+
+        /*while (SpawningEnemies && GameManager.Instance.CurrentState != GameStates.GameOver)
         {
             // If it has been long enough in between waves
-            if(timeSinceLastWave >= timeBetweenWaves)
+            // Wait for the time between waves
+            Person temp;
+            // Spawn people
+            for (int i = 0; i < numberOfEnemiesPerWave; i++)
             {
-                // Spawn perople
-                for(int i = 0; i < numberOfEnemiesPerWave; i++)
-                {
-                    // Grab an object from the ojbect pool
-                    GameObject temp = personObjectPool.GetPooledObject();
-                    // Set the position of that object to one of the bus stops
-                    temp.transform.position = GetRandomBusStop();
-                    yield return null;
-                }
-
-                // Reset the time since last wave
-                timeSinceLastWave = 0f;
-            }
-            else
-            {
-                // Increase the time since the last wave
-                timeSinceLastWave += Time.deltaTime;
+                // Grab an object from the ojbect pool
+                temp = personObjectPool.GetPooledObject().GetComponent<Person>();
+                temp.transform.position = peopleSpawnPoints[GetRandomIndex()];
+                // Set the position of that object to one of the bus stops
+                //temp.destination = peopleSpawnPoints[GetRandomIndex()];
+                
             }
 
-            yield return null;
+            yield return new WaitForSeconds(timeBetweenWaves);
+        }        */
+
+        Person temp;
+        // Spawn people
+        for (int i = 0; i < numberOfEnemiesPerWave; i++)
+        {
+            // Grab an object from the ojbect pool
+            temp = personObjectPool.GetPooledObject().GetComponent<Person>();
+            temp.transform.position = peopleSpawnPoints[GetRandomIndex()];
+            // Set the position of that object to one of the bus stops
+            temp.destination = peopleSpawnPoints[GetRandomIndex()];
+
         }
-
-        
     }
 
     private void OnEnable()
     {
         // Set the game manager's people spawner to this
         GameManager.Instance.PeopleSpawner = this;
+
+        // Start the spawning coroutine
+        StartCoroutine(SpawnPeopleRandomly());
+
     }
 
 
@@ -94,28 +102,31 @@ public class PeopleSpawner : MonoBehaviour
     /// Author: Ben Hoffman
     /// </summary>
     /// <returns>A random position from our bus stop array</returns>
-    public Vector3 GetRandomBusStop()
+    public int GetRandomIndex()
     {
         // If we have no array, then return 0
         if(peopleSpawnPoints == null)
         {
-            return Vector3.zero;
+            return -1;
         }
+
         // If there is only 1 thing in our array, then just return that
         else if(peopleSpawnPoints.Length == 0)
         {
-            return peopleSpawnPoints[0];
+            return 0;
         }
 
         // Otherwise generate a random integer
-        int randomIndex = Random.Range(0, peopleSpawnPoints.Length);
+        int randomIndex = Random.Range(0, peopleSpawnPoints.Length - 1);
 
         while(randomIndex == lastIndex)
         {
             randomIndex = Random.Range(0, peopleSpawnPoints.Length);
         }
-
-        return peopleSpawnPoints[randomIndex];
+        // keep track of the last index that we used
+        lastIndex = randomIndex;
+        // Return this random index
+        return randomIndex;
     }
 	
 }

@@ -11,20 +11,21 @@ using UnityEngine;
 public class Person : MonoBehaviour {
 
     public float lifeAfterAnger = 1f;
-    public float startTemper;
+    [Tooltip("How long it will take for this person to get angry when they haven't been picked up")]
+    public float startTemper = 10;
 
-    public Transform destination;   // Where this 'person' wants to go
+    public Vector3 destination;   // Where this 'person' wants to go
 
+    [Space]
+    [Header("Colors!")]
     public Color angryColor;
     public Color happyColor;
+    //public PeopleSpawner peopleSpawner;
 
     private SpriteRenderer spRend;
-
     private float currentTemper;    // This person's current temper
-
     private bool pickedUp;
     private bool reportedAngry;
-
     private float _timeSinceAngry;
 
     public bool PickedUp { get { return pickedUp; } }
@@ -64,7 +65,7 @@ public class Person : MonoBehaviour {
                 GetAngry();
             }
             // Lerp our color based on the percentage of how angry we are
-            spRend.color = Color.Lerp(happyColor, angryColor, currentTemper / startTemper);
+            spRend.color = Color.Lerp(angryColor, happyColor, currentTemper / startTemper);
         }
 
         // Only stay alive for a certain amount of time after we get angry
@@ -82,6 +83,26 @@ public class Person : MonoBehaviour {
 
 	}
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        // If we collide with the player, then get angry
+        if (collision.CompareTag("Player"))
+        {
+            GetAngry();
+        }
+    }
+
+    public void DropOff()
+    {
+        // Make the person happy
+        spRend.color = happyColor;
+        // De parent the person
+        transform.parent = null;
+        // Disappear after a second
+        reportedAngry = true;
+    }
+    
+
     /// <summary>
     /// Handle this person getting angry
     /// 
@@ -89,7 +110,12 @@ public class Person : MonoBehaviour {
     /// </summary>
     public void GetAngry()
     {
-        // Show little exclamation points
+        // If we are not playing, then return
+        if(GameManager.Instance.CurrentState != GameStates.Playing)
+        {
+            return;
+        }
+        // TODO: Show little exclamation points
 
         // Report to the player that they have angered someone
         GameManager.Instance.AngerManager.AngeredPerson();
@@ -129,8 +155,24 @@ public class Person : MonoBehaviour {
             pickedUp = true;
 
             // Set our sprite to angry
-            GetComponentInChildren<SpriteRenderer>().color = Color.black;
+            spRend.color = Color.black;
 
         }
     }
+
+    private void OnEnable()
+    {
+        // Set my destination
+        //destination = peopleSpawner.GetRandomBusStop();
+
+        // Unparent the object
+        transform.parent = null;
+
+        // Reset the temper on this person
+        _timeSinceAngry = startTemper;
+        reportedAngry = false;
+        pickedUp = false;
+
+    }
+
 }

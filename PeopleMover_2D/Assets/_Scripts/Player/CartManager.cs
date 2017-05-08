@@ -29,20 +29,18 @@ public class CartManager : MonoBehaviour {
     public UnityEngine.UI.Text Text_currentPeopleCount;
     public UnityEngine.UI.Text Text_maxPeopleCount;
 
-
-    private AngerManagment angerManager;
+    //private AngerManagment angerManager;
     private Person personInRange;
     private int currentPeopleInCart;
 
     private Queue<Person> peopleInCart;
-
-    private Transform[] destinationObjects; 
+    private Transform destinationObject;
 
 
     private void Start()
     {
         // Get the anger manager
-        angerManager = GetComponent<AngerManagment>();
+        //angerManager = GetComponent<AngerManagment>();
 
         // Instantiate the number of people that we have seats for
         peopleInCart = new Queue<Person>();
@@ -52,17 +50,20 @@ public class CartManager : MonoBehaviour {
         Text_currentPeopleCount.text = currentPeopleInCart.ToString();
 
         // Set up the destination markers
-        destinationObjects = new Transform[numberOfSeats];
+        //destinationObjects = new Transform[numberOfSeats];
 
-        for (int i = 0; i < numberOfSeats; i++)
-        {
-            // Instantiate one of these objects
-            GameObject temp = Instantiate(showDestination_Prefab);
-            // Set it as inactive
-            temp.gameObject.SetActive(false);
-            // Keep track of this objects position for later
-            destinationObjects[i] = temp.transform;
-        }
+        destinationObject = Instantiate(showDestination_Prefab).transform;
+        destinationObject.gameObject.SetActive(false);
+
+        /* for (int i = 0; i < numberOfSeats; i++)
+         {
+             // Instantiate one of these objects
+             GameObject temp = Instantiate(showDestination_Prefab);
+             // Set it as inactive
+             temp.gameObject.SetActive(false);
+             // Keep track of this objects position for later
+             destinationObjects[i] = temp.transform;
+         }*/
     }
 
     /// <summary>
@@ -89,12 +90,12 @@ public class CartManager : MonoBehaviour {
     /// <param name="collision">The object that we have entered the trigger zone with</param>
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Person"))
+        /*if (collision.gameObject.CompareTag("Person"))
         {
             // Anger that person
             collision.GetComponent<Person>().GetAngry();
-        }
-        else if (collision.gameObject.CompareTag("PersonInRange") && personInRange == null)
+        }*/
+        if (collision.gameObject.CompareTag("PersonInRange") && personInRange == null)
         {
             // Keep track of that person 
             personInRange = collision.GetComponentInParent<Person>();
@@ -103,15 +104,21 @@ public class CartManager : MonoBehaviour {
             if (personInRange.IsAngry)
             {
                 // Get rid of them
-
+                personInRange = null;
+                return;
             }
             else
             {
-
                 // let the cart know that we are in range of the cart now
                 personInRange.InRangeOfCart();
             }
 
+        }
+        // If we are colliding with a bus stop...
+        else if (collision.gameObject.CompareTag("Destination"))
+        {
+            // Try and drop someone off
+            DropOffPerson();
         }
 
         #region Using Layers (Not working)
@@ -164,10 +171,9 @@ public class CartManager : MonoBehaviour {
 
         personInRange.transform.localPosition = Vector3.zero;
 
-        // Set the destination object to the destination of the person
-        destinationObjects[currentPeopleInCart].gameObject.SetActive(true);
-        destinationObjects[currentPeopleInCart].transform.position = personInRange.destination.position;
-
+        destinationObject.gameObject.SetActive(true);
+        destinationObject.position = personInRange.destination;
+        
         // Remove the person that we were in range with from our temp placeholder object
         personInRange = null;
 
@@ -179,16 +185,17 @@ public class CartManager : MonoBehaviour {
         
     }
 
-
     private void DropOffPerson()
     {
         // If we have nobody, then return
-        if (!peopleInCart.Peek())
+        if (peopleInCart.Count == 0)
         {
             //TODO: Add some sort of bad sound to make sure that the player knows
             return;
         }
-
+        // Tell the person to be dropped off
+        peopleInCart.Dequeue().DropOff();
+        
         currentPeopleInCart--;
         
         // Update the UI
