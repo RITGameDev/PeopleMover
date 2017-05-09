@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,7 +11,8 @@ using UnityEngine;
 [RequireComponent(typeof(AngerManagment))]
 public class CartManager : MonoBehaviour {
 
-    
+    [Tooltip("A particle system that will be played when we drop people off")]
+    public ParticleSystem dropOffParticles;
     public int numberOfSeats;
     [Tooltip("One of these objects will be placed at every person's destination")]
     public GameObject showDestination_Prefab;
@@ -28,6 +30,7 @@ public class CartManager : MonoBehaviour {
     [Header("User Interface")]
     public UnityEngine.UI.Text Text_currentPeopleCount;
     public UnityEngine.UI.Text Text_maxPeopleCount;
+    public UnityEngine.UI.Text Text_HappyPeopleCount;
 
     //private AngerManagment angerManager;
     private Person personInRange;
@@ -36,12 +39,10 @@ public class CartManager : MonoBehaviour {
     private Queue<Person> peopleInCart;
     private Transform destinationObject;
 
+    private float happyCount = 0;
 
     private void Start()
     {
-        // Get the anger manager
-        //angerManager = GetComponent<AngerManagment>();
-
         // Instantiate the number of people that we have seats for
         peopleInCart = new Queue<Person>();
 
@@ -55,15 +56,7 @@ public class CartManager : MonoBehaviour {
         destinationObject = Instantiate(showDestination_Prefab).transform;
         destinationObject.gameObject.SetActive(false);
 
-        /* for (int i = 0; i < numberOfSeats; i++)
-         {
-             // Instantiate one of these objects
-             GameObject temp = Instantiate(showDestination_Prefab);
-             // Set it as inactive
-             temp.gameObject.SetActive(false);
-             // Keep track of this objects position for later
-             destinationObjects[i] = temp.transform;
-         }*/
+        Text_HappyPeopleCount.text = happyCount.ToString();
     }
 
     /// <summary>
@@ -193,13 +186,48 @@ public class CartManager : MonoBehaviour {
             //TODO: Add some sort of bad sound to make sure that the player knows
             return;
         }
+        // If we have the wrong destination then return
+        if(destinationObject.transform.position != peopleInCart.Peek().destination)
+        {
+            return;
+        }
+        // Turn off this destination
+        destinationObject.gameObject.SetActive(false);
+
         // Tell the person to be dropped off
         peopleInCart.Dequeue().DropOff();
-        
+        // Decrement the amount of people in the cart
         currentPeopleInCart--;
-        
+
+        // Play the drop off effect and sound
+        dropOffParticles.Play();
+
         // Update the UI
         Text_currentPeopleCount.text = currentPeopleInCart.ToString();
+        
+        // Increate the number of people made happy
+        happyCount++;
+        Text_HappyPeopleCount.text = happyCount.ToString();
+
+        // If we have nobody left now, then return
+        if(peopleInCart.Count <= 0)
+        {
+            return;
+        }
+
+        // Move the destination shower to the next destination
+        if (peopleInCart.Peek().destination == destinationObject.position)
+        {
+            // Call drop off person again
+            DropOffPerson();
+        }
+        // Otherwise...
+        else
+        {
+            // Move the destination to the next person's destination
+            destinationObject.position = peopleInCart.Peek().destination;
+        }
+
 
     }
 

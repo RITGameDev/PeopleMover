@@ -52,36 +52,24 @@ public class PeopleSpawner : MonoBehaviour
     {
         yield return new WaitForSeconds(timeBetweenWaves);
 
-        /*while (SpawningEnemies && GameManager.Instance.CurrentState != GameStates.GameOver)
+        while (SpawningEnemies && GameManager.Instance.CurrentState != GameStates.GameOver)
         {
-            // If it has been long enough in between waves
-            // Wait for the time between waves
             Person temp;
             // Spawn people
             for (int i = 0; i < numberOfEnemiesPerWave; i++)
             {
                 // Grab an object from the ojbect pool
                 temp = personObjectPool.GetPooledObject().GetComponent<Person>();
+                // Set the position of the person to a random destination 
                 temp.transform.position = peopleSpawnPoints[GetRandomIndex()];
                 // Set the position of that object to one of the bus stops
-                //temp.destination = peopleSpawnPoints[GetRandomIndex()];
-                
+                temp.destination = peopleSpawnPoints[GetRandomIndex()];
+
             }
-
+            // Wait time between waves of people
             yield return new WaitForSeconds(timeBetweenWaves);
-        }        */
+        }        
 
-        Person temp;
-        // Spawn people
-        for (int i = 0; i < numberOfEnemiesPerWave; i++)
-        {
-            // Grab an object from the ojbect pool
-            temp = personObjectPool.GetPooledObject().GetComponent<Person>();
-            temp.transform.position = peopleSpawnPoints[GetRandomIndex()];
-            // Set the position of that object to one of the bus stops
-            temp.destination = peopleSpawnPoints[GetRandomIndex()];
-
-        }
     }
 
     private void OnEnable()
@@ -90,8 +78,7 @@ public class PeopleSpawner : MonoBehaviour
         GameManager.Instance.PeopleSpawner = this;
 
         // Start the spawning coroutine
-        StartCoroutine(SpawnPeopleRandomly());
-
+        StartCoroutine(SpawnPeopleRandomly()); 
     }
 
 
@@ -123,6 +110,7 @@ public class PeopleSpawner : MonoBehaviour
         {
             randomIndex = Random.Range(0, peopleSpawnPoints.Length);
         }
+
         // keep track of the last index that we used
         lastIndex = randomIndex;
         // Return this random index
