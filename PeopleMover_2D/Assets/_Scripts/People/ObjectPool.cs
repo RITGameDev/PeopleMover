@@ -23,10 +23,10 @@ public class ObjectPool : MonoBehaviour {
     /// 
     /// Author: Ben Hoffman
     /// </summary>
-    void Start ()
+    void Awake ()
     {
         objectList = new List<GameObject>();
-        
+
 		for(int i = 0; i < pooledAmount; i++)
         {
             // Instantiate the pooled object and add it to our list
@@ -52,9 +52,7 @@ public class ObjectPool : MonoBehaviour {
             // If the object at this spot is INACTIVE
             if (!objectList[i].activeInHierarchy)
             {
-                // Actiate it in the heirarchy
                 objectList[i].SetActive(true);
-
                 // Return it
                 return objectList[i];
             }
@@ -65,7 +63,7 @@ public class ObjectPool : MonoBehaviour {
         // Add it to our object pooled
         objectList.Add(temp);
         // Return it
-        return Instantiate(pooledObj_Prefab);
+        return temp;
     }
 	
 }

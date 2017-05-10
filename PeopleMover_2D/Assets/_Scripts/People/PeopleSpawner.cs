@@ -30,18 +30,28 @@ public class PeopleSpawner : MonoBehaviour
     {
         // Find all objects with the bustop tag
         GameObject[] tempArr = GameObject.FindGameObjectsWithTag("Bus Stop");
-        // Instantiate the people spawn points array with the proper length
-        peopleSpawnPoints = new Vector3[tempArr.Length]; 
 
+        // Instantiate the people spawn points array with the proper length
+        peopleSpawnPoints = new Vector3[tempArr.Length];
+        // Get the object pool componenet
+        personObjectPool = GetComponent<ObjectPool>();
+        Person temp;
         // Set our people positions to the given positions of the bus stops
-        for (int i = 0; i < tempArr.Length; i++)
+        for (int i = 0; i < numberOfEnemiesPerWave; i++)
         {
+            // Grab an object from the ojbect pool
+            temp = personObjectPool.GetPooledObject().GetComponent<Person>();
+
+            // Set the position of the person to a random destination 
+            temp.transform.position = peopleSpawnPoints[GetRandomIndex()];
             // Set the element to the transform position
-            peopleSpawnPoints[i] = tempArr[i].transform.position;
+            temp.destination = peopleSpawnPoints[GetRandomIndex()];
         }
 
         // Get our object pool componenet
         personObjectPool = GetComponent<ObjectPool>();
+
+        //StartCoroutine(SpawnPeopleRandomly());
     }
 
     /// <summary>
@@ -64,12 +74,14 @@ public class PeopleSpawner : MonoBehaviour
                 temp.transform.position = peopleSpawnPoints[GetRandomIndex()];
                 // Set the position of that object to one of the bus stops
                 temp.destination = peopleSpawnPoints[GetRandomIndex()];
+                yield return new WaitForSeconds(0.1f);
 
             }
             // Wait time between waves of people
             yield return new WaitForSeconds(timeBetweenWaves);
-        }        
-
+        }
+        Debug.Log("Stopped Spawning people!");
+        Debug.Break();
     }
 
     private void OnEnable()

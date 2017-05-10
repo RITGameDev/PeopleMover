@@ -87,6 +87,7 @@
     <Compile Include="Assets\_Scripts\AngerManagment.cs" />
     <Compile Include="Assets\_Scripts\Camera\PixelPerfectCamera.cs" />
     <Compile Include="Assets\_Scripts\Camera\SmoothCameraFollow.cs" />
+    <Compile Include="Assets\_Scripts\ChangeColorOnTrigger.cs" />
     <Compile Include="Assets\_Scripts\Game Manager\GameManager.cs" />
     <Compile Include="Assets\_Scripts\Game Manager\GameStates.cs" />
     <Compile Include="Assets\_Scripts\People\ObjectPool.cs" />

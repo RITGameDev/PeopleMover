@@ -10,6 +10,8 @@ using UnityEngine;
 /// </summary>
 public class Person : MonoBehaviour {
 
+    #region Fields
+
     public float lifeAfterAnger = 1f;
     [Tooltip("How long it will take for this person to get angry when they haven't been picked up")]
     public float startTemper = 10;
@@ -27,6 +29,8 @@ public class Person : MonoBehaviour {
     private bool pickedUp;
     private bool reportedAngry;
     private float _timeSinceAngry;
+
+    #endregion
 
     public bool PickedUp { get { return pickedUp; } }
     public bool IsAngry { get { return reportedAngry; } }
@@ -64,6 +68,7 @@ public class Person : MonoBehaviour {
                 // Get angry 
                 GetAngry();
             }
+
             // Lerp our color based on the percentage of how angry we are
             spRend.color = Color.Lerp(angryColor, happyColor, currentTemper / startTemper);
         }
@@ -73,6 +78,7 @@ public class Person : MonoBehaviour {
         {
             // Increase the amount of time since we have been angry
             _timeSinceAngry += Time.deltaTime;
+
             // If we exceed that amount of time, then...
             if(_timeSinceAngry >= lifeAfterAnger)
             {
@@ -162,17 +168,20 @@ public class Person : MonoBehaviour {
 
     private void OnEnable()
     {
-        // Set my destination
-        //destination = peopleSpawner.GetRandomBusStop();
-
         // Unparent the object
         transform.parent = null;
+    }
 
-        // Reset the temper on this person
-        _timeSinceAngry = startTemper;
+    private void OnDisable()
+    {
+        // Reset the amount of time since we have reported as angry
+        _timeSinceAngry = 0f;
+        // Reset the start temper of the object
+        currentTemper = startTemper;
+        // Reset the flags of if we reported as angry
         reportedAngry = false;
-        pickedUp = false;
 
+        pickedUp = false;
     }
 
 }
