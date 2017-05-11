@@ -17,9 +17,17 @@ public class AngerManagment : MonoBehaviour {
     [Header("User Interface")]
     public Text Text_maxPeopleAngered;
     public Text Text_currentAngryPeople;
-
+    public Text Text_HappyPeople;
 
     private int currentAngeredPeople = 0;   // The current number of people hit
+    private int currentHappyPeople = 0;
+
+    public int CurrentHappyPeople
+    {
+        get { return currentHappyPeople; }
+        set { currentHappyPeople = value; Text_HappyPeople.text = currentHappyPeople.ToString(); }
+    }
+
 
     /// <summary>
     /// Set up the UI for this object
@@ -30,8 +38,14 @@ public class AngerManagment : MonoBehaviour {
     {
         Text_maxPeopleAngered.text = "/ " + allowedPeopleAngered.ToString();
         Text_currentAngryPeople.text = currentAngeredPeople.ToString();
+        Text_HappyPeople.text = currentHappyPeople.ToString();
     }
 
+    /// <summary>
+    /// Set the anger manager on the Game Controller in the scene to this 
+    /// 
+    /// Author: Ben Hoffman
+    /// </summary>
     private void OnEnable()
     {
         // The the game manager reference

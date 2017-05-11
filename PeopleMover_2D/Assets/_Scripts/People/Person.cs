@@ -8,13 +8,14 @@ using UnityEngine;
 /// 
 /// Author: Ben Hoffan
 /// </summary>
-public class Person : MonoBehaviour {
+public class Person : MonoBehaviour
+{
 
     #region Fields
 
     public float lifeAfterAnger = 1f;
     [Tooltip("How long it will take for this person to get angry when they haven't been picked up")]
-    public float startTemper = 10;
+    public float startLifetime = 10;
 
     public Vector3 destination;   // Where this 'person' wants to go
 
@@ -43,7 +44,7 @@ public class Person : MonoBehaviour {
 	void Start ()
     {
         // Set the current temper of this player
-        currentTemper = startTemper;
+        currentTemper = startLifetime;
 
         // Get our sprite renderer component
         spRend = GetComponentInChildren<SpriteRenderer>();
@@ -70,7 +71,7 @@ public class Person : MonoBehaviour {
             }
 
             // Lerp our color based on the percentage of how angry we are
-            spRend.color = Color.Lerp(angryColor, happyColor, currentTemper / startTemper);
+            spRend.color = Color.Lerp(angryColor, happyColor, currentTemper / startLifetime);
         }
 
         // Only stay alive for a certain amount of time after we get angry
@@ -89,15 +90,28 @@ public class Person : MonoBehaviour {
 
 	}
 
+    /// <summary>
+    /// Get angry when we enter a trigger that is a person
+    /// 
+    /// Author: Ben Hoffman
+    /// </summary>
+    /// <param name="collision"></param>
     private void OnTriggerEnter2D(Collider2D collision)
     {
         // If we collide with the player, then get angry
         if (collision.CompareTag("Player"))
         {
+            // Tell this person to get angry
             GetAngry();
         }
     }
 
+    /// <summary>
+    /// Set the color to to the happy color, unparent this object,
+    /// and start the lifecycle countdown
+    /// 
+    /// Author: Ben Hoffman
+    /// </summary>
     public void DropOff()
     {
         // Make the person happy
@@ -107,7 +121,6 @@ public class Person : MonoBehaviour {
         // Disappear after a second
         reportedAngry = true;
     }
-    
 
     /// <summary>
     /// Handle this person getting angry
@@ -127,7 +140,7 @@ public class Person : MonoBehaviour {
         GameManager.Instance.AngerManager.AngeredPerson();
 
         // Set our sprite to angry
-        GetComponentInChildren<SpriteRenderer>().color = angryColor;
+        spRend.color = angryColor;
         // Report that we have been angry
         reportedAngry = true;
     }
@@ -144,7 +157,7 @@ public class Person : MonoBehaviour {
         if (!reportedAngry)
         {
             // Change our sprite
-            GetComponentInChildren<SpriteRenderer>().color = happyColor;
+            spRend.color = happyColor;
         }
     }
 
@@ -166,21 +179,32 @@ public class Person : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Ensure that this person does not have a parent object
+    /// 
+    /// Author: Ben Hoffman
+    /// </summary>
     private void OnEnable()
     {
         // Unparent the object
         transform.parent = null;
     }
 
+    /// <summary>
+    /// Ensure that when this person has been reset and
+    /// is ready to be put back in the object pool
+    /// 
+    /// Author: Ben Hoffman
+    /// </summary>
     private void OnDisable()
     {
         // Reset the amount of time since we have reported as angry
         _timeSinceAngry = 0f;
         // Reset the start temper of the object
-        currentTemper = startTemper;
+        currentTemper = startLifetime;
         // Reset the flags of if we reported as angry
         reportedAngry = false;
-
+        // We have not been picked up yet
         pickedUp = false;
     }
 

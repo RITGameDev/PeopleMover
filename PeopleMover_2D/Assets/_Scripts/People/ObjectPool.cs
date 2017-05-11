@@ -27,7 +27,7 @@ public class ObjectPool : MonoBehaviour {
     {
         objectList = new List<GameObject>();
 
-		for(int i = 0; i < pooledAmount; i++)
+        for (int i = 0; i < pooledAmount; i++)
         {
             // Instantiate the pooled object and add it to our list
             objectList.Add(Instantiate(pooledObj_Prefab));
@@ -35,6 +35,7 @@ public class ObjectPool : MonoBehaviour {
             objectList[i].SetActive(false);
         }
 	}
+
 
     /// <summary>
     /// Loop through our list until we find an inactive object,

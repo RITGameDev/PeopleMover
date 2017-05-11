@@ -11,35 +11,39 @@ using UnityEngine;
 [RequireComponent(typeof(AngerManagment))]
 public class CartManager : MonoBehaviour {
 
+    #region Fields
+
     [Tooltip("A particle system that will be played when we drop people off")]
     public ParticleSystem dropOffParticles;
+
+    [Tooltip("How many seats that we have in the cart")]
     public int numberOfSeats;
+
     [Tooltip("One of these objects will be placed at every person's destination")]
     public GameObject showDestination_Prefab;
 
     [Space]
-
     [Header("Collision Masks")]
     [Tooltip("This is the layer that you can pick people up on, without angering them")]
     public LayerMask pickUpRangeMask;
+
     [Tooltip("This is the layer that people get hurt on")]
     public LayerMask hittingPersonMask;
 
     [Space]
-  
     [Header("User Interface")]
     public UnityEngine.UI.Text Text_currentPeopleCount;
     public UnityEngine.UI.Text Text_maxPeopleCount;
-    public UnityEngine.UI.Text Text_HappyPeopleCount;
 
-    //private AngerManagment angerManager;
+    // A temp object to keep track of the person that is in the range right now
     private Person personInRange;
-    private int currentPeopleInCart;
-
+    // A queue to hold the people that we have picked up in the cart
     private Queue<Person> peopleInCart;
+    // A reference to destination object's transform
     private Transform destinationObject;
 
-    private float happyCount = 0;
+    private bool isDestination;
+    #endregion
 
     private void Start()
     {
@@ -48,31 +52,30 @@ public class CartManager : MonoBehaviour {
 
         // Set up the UI
         Text_maxPeopleCount.text = "/ " + numberOfSeats.ToString();
-        Text_currentPeopleCount.text = currentPeopleInCart.ToString();
+        Text_currentPeopleCount.text = peopleInCart.Count.ToString();
 
-        // Set up the destination markers
-        //destinationObjects = new Transform[numberOfSeats];
-
+        // Instantiate the destination object prefab
         destinationObject = Instantiate(showDestination_Prefab).transform;
         destinationObject.gameObject.SetActive(false);
-
-        Text_HappyPeopleCount.text = happyCount.ToString();
     }
 
     /// <summary>
     /// Listen to input from the player to see if we want to pick up
     /// a person or not
+    /// 
+    /// Author: Ben Hoffman
     /// </summary>
     private void Update()
     {
+        // Make sure that we know that we are not colliding with destination
+        isDestination = false;
+        // If you press E and you have a person in range
         if (Input.GetKeyDown(KeyCode.E) && personInRange != null)
         {
             // Pick up this person
             PickUpPerson();
         }      
-
     }
-
 
     /// <summary>
     /// If we enter a trigger that is a person, then 
@@ -83,11 +86,7 @@ public class CartManager : MonoBehaviour {
     /// <param name="collision">The object that we have entered the trigger zone with</param>
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        /*if (collision.gameObject.CompareTag("Person"))
-        {
-            // Anger that person
-            collision.GetComponent<Person>().GetAngry();
-        }*/
+        // If we are in the pickup range of a person...
         if (collision.gameObject.CompareTag("PersonInRange") && personInRange == null)
         {
             // Keep track of that person 
@@ -108,8 +107,9 @@ public class CartManager : MonoBehaviour {
 
         }
         // If we are colliding with a bus stop...
-        else if (collision.gameObject.CompareTag("Destination"))
+        else if (collision.gameObject.CompareTag("Destination") && !isDestination)
         {
+            isDestination = true;
             // Try and drop someone off
             DropOffPerson();
         }
@@ -135,6 +135,13 @@ public class CartManager : MonoBehaviour {
         #endregion
     }
 
+    /// <summary>
+    /// If we are out of the range of a person now, set the personInRange
+    /// to null.
+    /// 
+    /// Author: Ben Hoffman
+    /// </summary>
+    /// <param name="collision"></param>
     private void OnTriggerExit2D(Collider2D collision)
     {
         // If we leave a bus stop then we can no longer pick people up[
@@ -144,14 +151,20 @@ public class CartManager : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Enque the person in the range to the queue that is our cart
+    /// Set the transform of that person to the cart
+    /// </summary>
     private void PickUpPerson()
     {
+        // If our cart is already full...
         if(peopleInCart.Count >= numberOfSeats)
         {
             //TODO: Tell the player somehow that their cart is full
-
+            // Don't pick anyone up
             return;
         }
+
 
         // Add this person to the queue
         peopleInCart.Enqueue(personInRange);
@@ -162,72 +175,74 @@ public class CartManager : MonoBehaviour {
         // Parent the transform of the person to our cart
         personInRange.transform.SetParent(transform);
 
+        // Set the local positoin of that person to 0 in our cart
         personInRange.transform.localPosition = Vector3.zero;
 
-        destinationObject.gameObject.SetActive(true);
-        destinationObject.position = personInRange.destination;
+        // If this is the first person in the queue...
+        if(peopleInCart.Count == 1)
+        {
+            // Activate the destinaion object
+            destinationObject.gameObject.SetActive(true);
+            destinationObject.position = personInRange.destination;
+        }
+
         
         // Remove the person that we were in range with from our temp placeholder object
         personInRange = null;
 
         // Increase the number of people that are in our cart
-        currentPeopleInCart++;
+        //currentPeopleInCart++;
 
         // Update the UI 
-        Text_currentPeopleCount.text = currentPeopleInCart.ToString();
+        Text_currentPeopleCount.text = peopleInCart.Count.ToString();
         
     }
 
+    /// <summary>
+    /// Dequeue a person and drop them off, play the nice little particle
+    /// effect and a sound 
+    /// 
+    /// Author: Ben Hoffman
+    /// </summary>
     private void DropOffPerson()
     {
         // If we have nobody, then return
         if (peopleInCart.Count == 0)
         {
-            //TODO: Add some sort of bad sound to make sure that the player knows
             return;
         }
+
         // If we have the wrong destination then return
-        if(destinationObject.transform.position != peopleInCart.Peek().destination)
+      /*  if(destinationObject.transform.position != peopleInCart.Peek().destination)
         {
             return;
-        }
+        }*/
+
         // Turn off this destination
-        destinationObject.gameObject.SetActive(false);
 
         // Tell the person to be dropped off
         peopleInCart.Dequeue().DropOff();
-        // Decrement the amount of people in the cart
-        currentPeopleInCart--;
 
         // Play the drop off effect and sound
         dropOffParticles.Play();
 
         // Update the UI
-        Text_currentPeopleCount.text = currentPeopleInCart.ToString();
+        Text_currentPeopleCount.text = peopleInCart.Count.ToString();
         
         // Increate the number of people made happy
-        happyCount++;
-        Text_HappyPeopleCount.text = happyCount.ToString();
+        GameManager.Instance.AngerManager.CurrentHappyPeople++;
 
         // If we have nobody left now, then return
-        if(peopleInCart.Count <= 0)
+        if (peopleInCart.Count <= 0)
         {
+            // Turn off the destination 
+            destinationObject.gameObject.SetActive(false);
             return;
         }
 
+        // Show the next destination
+        destinationObject.position = peopleInCart.Peek().destination;
         // Move the destination shower to the next destination
-        if (peopleInCart.Peek().destination == destinationObject.position)
-        {
-            // Call drop off person again
-            DropOffPerson();
-        }
-        // Otherwise...
-        else
-        {
-            // Move the destination to the next person's destination
-            destinationObject.position = peopleInCart.Peek().destination;
-        }
-
 
     }
 

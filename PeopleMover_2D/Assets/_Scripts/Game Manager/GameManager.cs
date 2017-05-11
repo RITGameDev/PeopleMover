@@ -8,7 +8,9 @@ using UnityEngine.SceneManagement;
 /// 
 /// Author: Ben Hoffman
 /// </summary>
-public class GameManager : MonoBehaviour {
+public class GameManager : MonoBehaviour
+{
+    #region Fields
 
     // public static instance of this object for others to reach it
     public static GameManager Instance;
@@ -20,10 +22,22 @@ public class GameManager : MonoBehaviour {
 
     public GameStates CurrentState { get { return _currentState; } }
 
+    #endregion
+
     private void Awake()
     {
-        // Set the instance of the game manager
-        Instance = this;
+        // If we arlready have a game manager...
+        if(Instance != null)
+        {
+            // Then destroy this object
+            Destroy(gameObject);
+        }
+        // Otherwise there is no game manager...
+        else
+        {
+            // So set the instance of the game manager
+            Instance = this;
+        }
     }
 
     /// <summary>
@@ -83,7 +97,6 @@ public class GameManager : MonoBehaviour {
         Debug.Log("Game Over!");
 
         SceneManager.LoadScene("MainMenu", LoadSceneMode.Additive);
-
     }
 
     #region Utilities
