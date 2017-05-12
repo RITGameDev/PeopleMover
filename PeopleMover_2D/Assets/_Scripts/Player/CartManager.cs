@@ -42,6 +42,8 @@ public class CartManager : MonoBehaviour {
     // A reference to destination object's transform
     private Transform destinationObject;
 
+    private AudioSource audioSource;
+
     private bool isDestination;
     #endregion
 
@@ -57,6 +59,9 @@ public class CartManager : MonoBehaviour {
         // Instantiate the destination object prefab
         destinationObject = Instantiate(showDestination_Prefab).transform;
         destinationObject.gameObject.SetActive(false);
+
+        // Get the audio source component
+        audioSource = GetComponent<AudioSource>();
     }
 
     /// <summary>
@@ -225,6 +230,9 @@ public class CartManager : MonoBehaviour {
 
         // Play the drop off effect and sound
         dropOffParticles.Play();
+
+        // Play the simple ping audio
+        audioSource.Play();
 
         // Update the UI
         Text_currentPeopleCount.text = peopleInCart.Count.ToString();

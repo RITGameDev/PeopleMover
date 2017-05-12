@@ -93,6 +93,7 @@
     <Compile Include="Assets\_Scripts\People\ObjectPool.cs" />
     <Compile Include="Assets\_Scripts\People\PeopleSpawner.cs" />
     <Compile Include="Assets\_Scripts\People\Person.cs" />
+    <Compile Include="Assets\_Scripts\People\PersonMovement.cs" />
     <Compile Include="Assets\_Scripts\Player\CartManager.cs" />
     <Compile Include="Assets\_Scripts\Player\Movement.cs" />
   </ItemGroup>

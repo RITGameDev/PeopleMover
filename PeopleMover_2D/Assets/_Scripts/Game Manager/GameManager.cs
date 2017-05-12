@@ -65,7 +65,33 @@ public class GameManager : MonoBehaviour
         if (Input.GetButtonDown("Cancel"))
         {
             // Toggle if the menu scene is loaded or not
+            TogglePause();
         }
+    }
+
+    /// <summary>
+    /// If the game is paused, then change it to playing
+    /// If the game is playing, then pause it
+    /// 
+    /// Author: Ben Hoffman
+    /// </summary>
+    private void TogglePause()
+    {
+        // If we are already paused...
+        if(_currentState == GameStates.Paused)
+        {
+            // Reusme the game
+            _currentState = GameStates.Playing;
+            // Hide the pause menu
+        }
+        // If we are playing the game...
+        else if(_currentState == GameStates.Playing)
+        {
+            // Pause the game
+            _currentState = GameStates.Paused;
+            // Show the pause menu
+        }
+
     }
 
     /// <summary>
