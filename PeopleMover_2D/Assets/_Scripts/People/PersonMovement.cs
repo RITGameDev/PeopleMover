@@ -18,17 +18,19 @@ public class PersonMovement : MonoBehaviour
 
     private void OnEnable()
     {
-        
+        // Add a constant force in the forward direction   
     }
 
     private void OnDisable()
     {
-        
+        // Set the velocity to zero and remove the constant force   
     }
 
     // Update is called once per frame
     void Update ()
     {
-		
+		// Check if there is something in front of us
+
+        // If there is, then turn like 10 degrees
 	}
 }
